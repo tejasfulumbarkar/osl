@@ -1,0 +1,68 @@
+program 1  main.c
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+void bubbleSort(int a[], int n) {
+    int i, j, temp;
+    for(i=0;i<n-1;i++) {
+        for(j=0;j<n-i-1;j++) {
+            if(a[j] > a[j+1]) {
+                temp = a[j];
+                a[j] = a[j+1];
+                a[j+1] = temp;
+            }
+        }
+    }
+}
+
+int main() {
+    int arr[10], n, i;
+    pid_t pid;
+
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+
+    printf("Enter elements:\n");
+    for(i=0;i<n;i++)
+        scanf("%d", &arr[i]);
+
+    pid = fork();
+
+    if(pid == 0) { // Child process
+        bubbleSort(arr, n);
+
+        // Prepare arguments for execve
+        char *args[12];
+        char buf[10][10];
+
+        for(i=0;i<n;i++) {
+            sprintf(buf[i], "%d", arr[i]);
+            args[i] = buf[i];
+        }
+        args[n] = NULL; // Null terminated
+
+        execve("./reverse", args, NULL);
+        printf("execve failed\n");
+    }
+    else { // Parent
+        wait(NULL);
+    }
+    return 0;
+}
+
+
+program 2 : reverse.c
+
+#include <stdio.h>
+
+int main(int argc, char *argv[]) {
+    int i;
+    printf("Array in Reverse Order:\n");
+    for(i = argc - 1; i > 0; i--) {
+        printf("%s ", argv[i]);
+    }
+    printf("\n");
+    return 0;
+}
